@@ -57,7 +57,7 @@ async function askAgroChatbot({ message, context, language = 'en' }) {
         { role: 'user', content: buildUserPrompt({ message, context }) }
       ],
       temperature: 0.4,
-      max_tokens: 500
+      max_tokens: 900
     });
 
     const reply = (chatCompletion.choices?.[0]?.message?.content || '').trim();
