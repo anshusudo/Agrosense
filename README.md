@@ -188,7 +188,3 @@ Authorization: Bearer <token>
 - Restrict `FRONTEND_URL` to trusted frontend origins in production.
 - Disable `RUN_STARTUP_EMAIL_TEST` unless email integration is being tested deliberately.
 - Review upload and email configuration before deploying publicly.
-
-## License
-
-This project does not currently declare a separate open-source license.
