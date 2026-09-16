@@ -1,6 +1,10 @@
 const Groq = require('groq-sdk');
 
-const MODEL_NAME = 'llama-3.3-70b-versatile';
+const DEFAULT_MODEL_NAME = 'openai/gpt-oss-20b';
+
+function getModelName() {
+  return process.env.GROQ_MODEL || DEFAULT_MODEL_NAME;
+}
 let groqClient = null;
 
 function getClient() {
@@ -41,10 +45,11 @@ function buildUserPrompt({ message, context }) {
 
 async function askAgroChatbot({ message, context, language = 'en' }) {
   const client = getClient();
+  const model = getModelName();
 
   try {
     const chatCompletion = await client.chat.completions.create({
-      model: MODEL_NAME,
+      model,
       messages: [
         { role: 'system', content: buildSystemPrompt(language) },
         { role: 'user', content: buildUserPrompt({ message, context }) }
@@ -57,7 +62,7 @@ async function askAgroChatbot({ message, context, language = 'en' }) {
 
     return {
       reply: reply || 'I could not generate a response right now. Please try again.',
-      model: MODEL_NAME,
+      model,
       provider: 'groq',
       usage: chatCompletion.usage || null
     };
@@ -87,7 +92,7 @@ async function getChatbotHealthStatus() {
     provider: 'groq',
     configured,
     reachable: configured,
-    model: MODEL_NAME,
+    model: getModelName(),
     modelAvailable: configured
   };
 }
