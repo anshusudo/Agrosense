@@ -57,6 +57,77 @@ function HorizontalBars({ title, labels = [], values = [], colors = [] }) {
 
 const formatINR = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
 
+function formatChatInline(text, keyPrefix) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={`${keyPrefix}-bold-${index}`}>{part.slice(2, -2)}</strong>;
+    }
+
+    return <span key={`${keyPrefix}-text-${index}`}>{part}</span>;
+  });
+}
+
+function renderChatMessage(text) {
+  const lines = String(text || "").split(/\r?\n/);
+  const content = [];
+  let index = 0;
+
+  while (index < lines.length) {
+    const line = lines[index].trim();
+
+    if (!line) {
+      index += 1;
+      continue;
+    }
+
+    const heading = line.match(/^#{1,3}\s+(.+)/);
+    if (heading) {
+      content.push(
+        <div className="chatbot-message-heading" key={`heading-${index}`}>
+          {formatChatInline(heading[1], `heading-${index}`)}
+        </div>,
+      );
+      index += 1;
+      continue;
+    }
+
+    const bullet = line.match(/^[-*•]\s+(.+)/);
+    if (bullet) {
+      const items = [];
+      while (index < lines.length) {
+        const item = lines[index].trim().match(/^[-*•]\s+(.+)/);
+        if (!item) break;
+        items.push(<li key={`bullet-${index}`}>{formatChatInline(item[1], `bullet-${index}`)}</li>);
+        index += 1;
+      }
+      content.push(<ul className="chatbot-message-list" key={`list-${index}`}>{items}</ul>);
+      continue;
+    }
+
+    const numbered = line.match(/^\d+[.)]\s+(.+)/);
+    if (numbered) {
+      const items = [];
+      while (index < lines.length) {
+        const item = lines[index].trim().match(/^\d+[.)]\s+(.+)/);
+        if (!item) break;
+        items.push(<li key={`numbered-${index}`}>{formatChatInline(item[1], `numbered-${index}`)}</li>);
+        index += 1;
+      }
+      content.push(<ol className="chatbot-message-list" key={`numbered-list-${index}`}>{items}</ol>);
+      continue;
+    }
+
+    content.push(
+      <p className="chatbot-message-paragraph" key={`paragraph-${index}`}>
+        {formatChatInline(line, `paragraph-${index}`)}
+      </p>,
+    );
+    index += 1;
+  }
+
+  return content;
+}
+
 function Dashboard() {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -750,10 +821,9 @@ function Dashboard() {
                     background: msg.role === "user" ? "#d1fae5" : "#ffffff",
                     border: "1px solid #e5e7eb",
                     fontSize: 13,
-                    whiteSpace: "pre-wrap",
                   }}
                 >
-                  {msg.text}
+                  {msg.role === "assistant" ? renderChatMessage(msg.text) : msg.text}
                 </div>
               </div>
             ))}

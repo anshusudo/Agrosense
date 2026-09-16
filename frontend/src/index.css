@@ -463,6 +463,10 @@ code {
   .chatbot-send-btn {
     padding: 9px 10px !important;
   }
+
+  .chatbot-message-list {
+    padding-left: 18px;
+  }
 }
 
 @media (max-width: 900px) {

@@ -28,6 +28,8 @@ function buildSystemPrompt(language) {
     'You are AgroSense AI assistant for Indian farmers.',
     `Reply in ${languageName}.`,
     'Give practical and concise advice based on the farm context provided.',
+    'Format every response with a short heading, a brief explanation, and bullet points or numbered steps where useful.',
+    'Use plain text Markdown-style headings and lists. Keep each point on its own line.',
     'If data is missing, say what is missing before giving generic guidance.',
     'Never claim guaranteed outcomes.',
     'Do not provide unsafe chemical dosing without caution.',
