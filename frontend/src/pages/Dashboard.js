@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
@@ -160,6 +160,26 @@ function Dashboard() {
   const [chatFarmId, setChatFarmId] = useState("");
   const [chatbotOnline, setChatbotOnline] = useState(null);
 
+  const fetchFarms = useCallback((token) => {
+    axios
+      .get(`${API_BASE_URL}/api/farms`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setFarms(res.data);
+        if (res.data.length > 0) {
+          setChatFarmId((prev) => prev || res.data[0]._id);
+        }
+      })
+      .catch((err) => {
+        console.log(err.response?.data || err.message);
+        localStorage.removeItem("token");
+        navigate("/");
+      });
+  }, [navigate]);
+
   // ===== AUTH + INIT =====
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -170,7 +190,7 @@ function Dashboard() {
     }
 
     fetchFarms(token);
-  }, [navigate]);
+  }, [fetchFarms, navigate]);
 
   useEffect(() => {
     setChatMessages([
@@ -192,27 +212,6 @@ function Dashboard() {
   }, [reportStatus]);
 
   // ===== API FUNCTIONS =====
-
-  // Fetch farms
-  const fetchFarms = (token) => {
-    axios
-      .get(`${API_BASE_URL}/api/farms`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setFarms(res.data);
-        if (res.data.length > 0) {
-          setChatFarmId((prev) => prev || res.data[0]._id);
-        }
-      })
-      .catch((err) => {
-        console.log(err.response?.data || err.message);
-        localStorage.removeItem("token");
-        navigate("/");
-      });
-  };
 
   // Create farm
   const handleChange = (e) => {
@@ -269,7 +268,7 @@ function Dashboard() {
     setReportStatus("");
 
     try {
-      const res = await axios.get(
+      await axios.get(
         `${API_BASE_URL}/api/reports/send/${farmId}`,
         {
           headers: {
@@ -304,7 +303,7 @@ function Dashboard() {
       );
 
       const contentDisposition = response.headers["content-disposition"];
-      const fileNameMatch = contentDisposition?.match(/filename="?([^\"]+)"?/i);
+      const fileNameMatch = contentDisposition?.match(/filename="?([^"]+)"?/i);
       const fileName = fileNameMatch?.[1] || `AgroSense_Report_${farmId}.pdf`;
 
       const blob = new Blob([response.data], { type: "application/pdf" });

@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { translations } from '../i18n/translations';
 
 const LanguageContext = createContext(null);
@@ -21,10 +21,7 @@ export function LanguageProvider({ children }) {
     return translations[language]?.[key] || translations.en[key] || key;
   };
 
-  const value = useMemo(
-    () => ({ language, changeLanguage, t }),
-    [language]
-  );
+  const value = { language, changeLanguage, t };
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
