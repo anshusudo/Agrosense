@@ -5,11 +5,11 @@ console.log('EMAIL_USER:', process.env.EMAIL_USER);
 console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***' : 'UNDEFINED');
 console.log('EMAIL_FROM:', process.env.EMAIL_FROM);
 
-// Create transporter using Gmail SMTP (port 587 + STARTTLS)
+// Create the transporter without requiring SMTP to be reachable during startup.
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: Number(process.env.EMAIL_PORT || 587),
+  secure: process.env.EMAIL_SECURE === 'true',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -21,17 +21,21 @@ const transporter = nodemailer.createTransport({
   maxConnections: 1,
   maxMessages: Infinity,
   rateDelta: 1000,
-  rateLimit: 5
+  rateLimit: 5,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000
 });
 
-// Verify transporter connection on startup (non-blocking)
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('❌ Email transporter error:', error);
-  } else {
-    console.log('✅ Email transporter ready');
-  }
-});
+if (process.env.EMAIL_VERIFY_ON_STARTUP === 'true') {
+  transporter.verify((error) => {
+    if (error) {
+      console.log('Email transporter error:', error.message);
+    } else {
+      console.log('Email transporter ready');
+    }
+  });
+}
 
 async function sendOTP(email, otp, userName) {
   try {
