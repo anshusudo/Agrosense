@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Groq = require('groq-sdk');
 
-const DEFAULT_GEMINI_MODELS = ['gemini-3.6-flash'];
+const DEFAULT_GEMINI_MODELS = ['gemini-2.5-flash'];
 
 function getGeminiModels() {
   const configuredModels = (process.env.GEMINI_MODEL || '')
@@ -121,7 +121,7 @@ async function analyzeCropImageWithGemini({ imageBuffer, mimeType, cropType, not
     ],
     generationConfig: {
       temperature: 0.2,
-      maxOutputTokens: 1400,
+      maxOutputTokens: 2400,
       responseMimeType: 'application/json',
       responseSchema: {
         type: 'OBJECT',
