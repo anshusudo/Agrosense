@@ -1,7 +1,7 @@
 const axios = require('axios');
 const Groq = require('groq-sdk');
 
-const DEFAULT_GEMINI_MODELS = ['gemini-2.5-flash'];
+const DEFAULT_GEMINI_MODELS = ['gemini-3.5-flash'];
 
 function getGeminiModels() {
   const configuredModels = (process.env.GEMINI_MODEL || '')
@@ -95,7 +95,10 @@ function shouldRetryWithNextModel(error) {
     message.includes('quota exceeded') ||
     message.includes('rate limit') ||
     message.includes('retry in') ||
-    message.includes('resource exhausted')
+    message.includes('resource exhausted') ||
+    message.includes('high demand') ||
+    message.includes('temporarily unavailable') ||
+    message.includes('overloaded')
   );
 }
 
